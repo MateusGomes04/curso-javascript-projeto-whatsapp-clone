@@ -22,7 +22,7 @@ export class Firebase {
 
     init() {
 
-        if (!this._initialize) {
+        if (!window._initializedFirebase) {
 
             firebase.initializeApp(this._firebaseConfig);
 
@@ -30,7 +30,7 @@ export class Firebase {
             });
 
 
-            this._initialize = true;
+            window._initializedFirebase = true;
         }
 
     };
