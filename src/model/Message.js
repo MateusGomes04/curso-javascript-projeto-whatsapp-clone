@@ -305,14 +305,14 @@ export class Message extends Model {
         });
 
     }
+    
 
     static getRef(chatId) {
 
         return Firebase.db()
             .collection('chats')
             .doc(chatId)
-            .collection('messages');//caminho até as mensagens
-
+            .collection('messages');
     }
 
 
