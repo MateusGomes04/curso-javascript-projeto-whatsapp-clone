@@ -2,14 +2,16 @@ import { Firebase } from "../util/Firebase";
 import { Format } from "../util/Format";
 import { Model } from "./Model";
 
+
+
 export class Message extends Model {
 
     constructor() {
         super();
     }
 
-    get id() {return this._data.id;}
-    set id(value) {return this._data.id = value}
+    get id() { return this._data.id; }
+    set id(value) { return this._data.id = value }
 
     get content() { return this._data.content; }
     set content(value) { return this._data.content = value }
@@ -23,9 +25,29 @@ export class Message extends Model {
     get status() { return this._data.status; }
     set status(value) { return this._data.status = value }
 
+    get preview() { return this._data.preview; }
+    set preview(value) { return this._data.preview = value }
+
+    get info() { return this._data.info; }
+    set info(value) { return this._data.info = value }
+
+    get fileType() { return this._data.fileType; }
+    set fileType(value) { return this._data.fileType = value }
+
+    get from() { return this._data.from; }
+    set from(value) { return this._data.from = value }
+
+    get size() { return this._data.size; }
+    set size(value) { return this._data.size = value }
+
+    get filename() { return this._data.filename; }
+    set filename(value) { return this._data.filename = value }
+
     getViewElement(me = true) {
 
         let div = document.createElement('div');
+
+        div.id = `_${this.id}`
 
         div.className = 'message';
 
@@ -54,7 +76,7 @@ export class Message extends Model {
                                 </div>
                             </div>
                             <div class="_1lC8v">
-                                <div dir="ltr" class="_3gkvk selectable-text invisible-space copyable-text">Nome do Contato Anexado</div>
+                            <div dir="ltr" class="_3gkvk selectable-text invisible-space copyable-text">${this.content.name}</div>
                             </div>
                             <div class="_3a5-b">
                                 <div class="_1DZAH" role="button">
@@ -69,6 +91,21 @@ export class Message extends Model {
                 </div>
             
                 `;
+
+                if (this.content.photo) {
+
+                    let img = div.querySelector('.photo-contact-sended');
+                    img.src = this.content.photo;
+                    img.show()
+
+                }
+
+                div.querySelector('.btn-message-send').on('click', e=> {
+
+                    console.log('Enviar Mensagem')
+
+                })
+
                 break;
 
             case 'image':
@@ -118,16 +155,16 @@ export class Message extends Model {
                 </div>
                 `;
 
-                div.querySelector('.message-photo').on('load', e=>{
+                div.querySelector('.message-photo').on('load', e => {
 
                     div.querySelector('.message-photo').show()
                     div.querySelector('._34Olu').hide();
                     div.querySelector('._3v3PK').css({
-                        height:'auto'
+                        height: 'auto'
                     });
-    
+
                 });
-    
+
                 break;
 
             case 'document':
@@ -135,13 +172,13 @@ export class Message extends Model {
                 <div class="_3_7SH _1ZPgd ">
                     <div class="_1fnMt _2CORf">
                         <a class="_1vKRe" href="#">
-                            <div class="_2jTyA" style="background-image: url()"></div>
+                        <div class="_2jTyA" style="background-image: url(${this.preview})"></div>
                             <div class="_12xX7">
                                 <div class="_3eW69">
                                     <div class="JdzFp message-file-icon icon-doc-pdf"></div>
                                 </div>
                                 <div class="nxILt">
-                                    <span dir="auto" class="message-filename">Arquivo.pdf</span>
+                                <span dir="auto" class="message-filename">${this.filename}</span>
                                 </div>
                                 <div class="_17viz">
                                     <span data-icon="audio-download" class="message-file-download">
@@ -159,9 +196,9 @@ export class Message extends Model {
                             </div>
                         </a>
                         <div class="_3cMIj">
-                            <span class="PyPig message-file-info">32 páginas</span>
-                            <span class="PyPig message-file-type">PDF</span>
-                            <span class="PyPig message-file-size">4 MB</span>
+                        <span class="PyPig message-file-info">${this.info}</span>
+                        <span class="PyPig message-file-type">${this.fileType}</span>
+                        <span class="PyPig message-file-size">${this.size}</span>
                         </div>
                         <div class="_3Lj_s">
                             <div class="_1DZAH" role="button">
@@ -171,6 +208,13 @@ export class Message extends Model {
                     </div>
                 </div>
                 `;
+
+                div.on('click', e => {
+
+                    window.open(this.content);
+
+                });
+
                 break;
 
             case 'audio':
@@ -254,7 +298,7 @@ export class Message extends Model {
 
             default:
                 div.innerHTML = `
-                <div class="font-style _3DFk6 tail" id= "_${this.id}">
+                <div class="font-style _3DFk6 tail">
                     <span class="tail-container"></span>
                     <span class="tail-container highlight"></span>
                     <div class="Tkt2p">
@@ -291,68 +335,141 @@ export class Message extends Model {
 
     }
 
-    static sendImage(chatId, from, file){
 
-        return new Promise((s, f)=>{
+    static upload(file, from) {
 
-        let uploadTask = Firebase.hd().ref(from).child(Date.now() + '_' + file.name).put(file);
 
-        uploadTask.on('state_changed', e=>{
+        return new Promise((s, f) => {
 
-            console.info('upload', e);
 
-        }, err =>{
-            console.error(err);
-        }, ()=>{
+            let uploadTask = Firebase.hd().ref(from).child(Date.now() + '_' + file.name).put(file);
 
-            uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-                Message.send(
-                    chatId, 
-                    from, 
-                    'image', 
-                    downloadURL  
-            ).then(()=>{
 
-                s();
+            uploadTask.on('state_changed', e => {
+
+                console.info('upload', e);
+
+            }, err => {
+
+                f(err);
+            }, () => {
+
+
+                s(uploadTask.snapshot)
+
+                })
+
+            });
+    }
+
+    static sendContact(chatId, from, contact) {
+
+        return Message.send(chatId, from, 'contact', contact);
+
+    }
+
+    
+    static sendDocument(chatId, from, file, filePreview, info) {
+
+        Message.send(chatId, from, 'document', '').then(msgRef => {
+
+            Message.upload(file, from).then(downloadURL => {
+
+                let downloadFile = downloadURL;
+
+
+                if (filePreview) {
+
+                    Message.upload(filePreview, from).then(downloadURL2 => {
+
+                        let dowloadPreview = downloadURL2;
+
+                        msgRef.set({
+                            content: downloadFile,
+                            preview: dowloadPreview,
+                            filename: file.name,
+                            size: file.size,
+                            fileType: file.type,
+                            status: 'sent',
+                            info
+                        }, {
+                            merge: true
+                        });
+
+                    });
+
+                } else {
+
+                    msgRef.set({
+                        content: downloadFile,
+                        filename: file.name,
+                        size: file.size,
+                        fileType: file.type,
+                        status: 'sent'
+                    }, {
+                        merge: true
+                    });
+
+                }
 
             });
 
         });
+    }
 
-    });
 
-    })
-}
+    static sendImage(chatId, from, file) {
+
+        return new Promise((s, f) => {
+
+            Message.upload(file, from).then(downloadURL => {
+
+                Message.send(
+                    chatId,
+                    from,
+                    'image',
+                    downloadURL
+                ).then(() => {
+
+                    s();
+
+                });
+
+            });
+
+
+        });
+
+    }
+
 
     static send(chatId, from, type, content) {
-
-        return new Promise((s, f)=>{
-
+        return new Promise((s, f) => {
             Message.getRef(chatId).add({
                 content,
                 timeStamp: new Date(),
                 status: 'wait',
-                type, 
+                type,
                 from
-            }).then(result=>{
-    
-                result.parent.doc(result.id).set({
-                    status:'sent'
+            }).then(result => {
+
+
+                let docRef = result.parent.doc(result.id);
+
+                docRef.set({
+                    status: 'sent'
                 }, {
-                    merge:true
-                }).then(()=>{
-    
-                    s();
-    
+                    merge: true
+                }).then(() => {
+
+
+                    s(docRef);
+
                 });
-    
+
             });
-    
-           });
-    
-
+        });
     }
-
 
     static getRef(chatId) {
 
@@ -362,13 +479,13 @@ export class Message extends Model {
             .collection('messages');
     }
 
-    getStatusViewElement(){
+    getStatusViewElement() {
 
         let div = document.createElement('div');
 
         div.className = 'message-status';
 
-        switch(this.status){
+        switch (this.status) {
 
             case 'wait':
                 div.innerHTML = `
@@ -378,7 +495,7 @@ export class Message extends Model {
                         </svg>
                     </span>
                 `
-            break;
+                break;
 
             case 'sent':
                 div.innerHTML = `
@@ -388,7 +505,7 @@ export class Message extends Model {
                     </svg>
                 </span>
          `;
-            break;
+                break;
 
             case 'received':
                 div.innerHTML = `
@@ -398,7 +515,7 @@ export class Message extends Model {
                         </svg>
                     </span>
                 `
-            break;
+                break;
 
             case 'read':
                 div.innerHTML = `
@@ -408,7 +525,7 @@ export class Message extends Model {
                         </svg>
                 </span>       
                 `
-            break;
+                break;
 
 
         }
