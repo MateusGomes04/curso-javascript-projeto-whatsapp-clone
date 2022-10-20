@@ -35,41 +35,41 @@ export class Firebase {
 
     };
 
-   static db(){
+    static db() {
 
-    return firebase.firestore();
-   }
+        return firebase.firestore();
+    }
 
-   static hd(){
+    static hd() {
 
-    return firebase.storage();
+        return firebase.storage();
 
-   }
+    }
 
-   initAuth(){
+    initAuth() {
 
-    return new Promise((s, f)=>{
+        return new Promise((s, f) => {
 
-        let provider = new firebase.auth.GoogleAuthProvider();
+            let provider = new firebase.auth.GoogleAuthProvider();
 
-        firebase.auth().signInWithPopup(provider)
-        .then(result=>{
+            firebase.auth().signInWithPopup(provider)
+                .then(result => {
 
-            let token = result.credential.accessToken;
-            let user = result.user;
+                    let token = result.credential.accessToken;
+                    let user = result.user;
 
-            s({
-                user, 
-                token
+                    s({
+                        user,
+                        token
+                    });
+
+                })
+                .catch(err => {
+                    f(err);
+                });
         });
 
-        })
-        .catch(err=>{
-            f(err);
-        });
-    });
+    }
 
-}
 
-   
 }

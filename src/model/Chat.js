@@ -4,7 +4,9 @@ import { Model } from "./Model";
 export class Chat extends Model {
 
     constructor() {
+
         super();
+
     }
 
     get users() { this._data.users; }
@@ -25,8 +27,9 @@ export class Chat extends Model {
 
             let users = {};
 
-            users[btoa(meEmail)] = true;
-            users[btoa(contactEmail)] = true;
+            users[btoa(meEmail)] = true
+            users[btoa(contactEmail)] = true
+
 
             Chat.getRef().add({
                 users,
@@ -35,7 +38,7 @@ export class Chat extends Model {
 
                 Chat.getRef().doc(doc.id).get().then(chat => {
 
-                    s(chat);
+                    s(chat)
 
                 }).catch(err => { f(err) });
 
@@ -45,13 +48,13 @@ export class Chat extends Model {
 
     }
 
-
     static find(meEmail, contactEmail) {
 
         return Chat.getRef()
             .where(btoa(meEmail), '==', true)
-            .where(btoa(contactEmail), '==', true)
-            .get();
+            .where(btoa(contactEmail), '==', true).get();
+
+
     }
 
     static createIfNotExists(meEmail, contactEmail) {
@@ -64,21 +67,23 @@ export class Chat extends Model {
 
                     Chat.create(meEmail, contactEmail).then(chat => {
 
-                        s(chat);
+                        s(chat)
 
                     });
 
                 } else {
 
                     chats.forEach(chat => {
+
                         s(chat);
+
                     });
 
                 }
 
             }).catch(err => { f(err) });
 
-        });
+        })
 
     }
 

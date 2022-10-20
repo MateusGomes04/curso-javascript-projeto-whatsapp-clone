@@ -1,5 +1,5 @@
-import { Firebase } from "./../util/Firebase";
-import { Model } from "./Model";
+import { Firebase } from './../util/Firebase';
+import { Model } from './Model';
 
 export class User extends Model {
 
@@ -23,17 +23,19 @@ export class User extends Model {
     get chatId() { return this._data.chatId; }
     set chatId(value) { this._data.chatId = value; }
 
+
     getById(id) {
 
         return new Promise((s, f) => {
 
+
+
             User.findByEmail(id).onSnapshot(doc => {
 
-                this.fromJSON(doc.data());
+                this.fromJSON(doc.data())
 
                 s(doc);
-            });
-
+            })
         });
 
     }
@@ -46,7 +48,8 @@ export class User extends Model {
 
     static getRef() {
 
-        return Firebase.db().collection('/users')
+        return Firebase.db().collection('/users');
+
     }
 
     static getContactsRef(id) {
@@ -58,7 +61,9 @@ export class User extends Model {
     }
 
     static findByEmail(email) {
+
         return User.getRef().doc(email);
+
     }
 
     addContact(contact) {
@@ -73,7 +78,8 @@ export class User extends Model {
 
         return new Promise((s, f) => {
 
-            User.getContactsRef(this.email).where('name', '>=', filter).onSnapshot(docs =>{
+            User.getContactsRef(this.email).where('name', '>=', filter).onSnapshot(docs => {
+
                 let contacts = [];
 
                 docs.forEach(doc => {

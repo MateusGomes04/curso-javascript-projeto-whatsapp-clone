@@ -1,6 +1,6 @@
 export class Format {
 
-    static getCamelCase(text){
+    static getCamelCase(text) {
 
         let div = document.createElement('div');
 
@@ -9,7 +9,7 @@ export class Format {
         return Object.keys(div.firstChild.dataset)[0];
     }
 
-    static toTime(duration){
+    static toTime(duration) {
 
         let seconds = parseInt((duration / 1000) % 60);
         let minutes = parseInt((duration / (1000 * 60)) % 60);
@@ -23,16 +23,16 @@ export class Format {
 
     }
 
-    static dateToTime(date, locale = 'pt-BR'){
+    static dateToTime(date, locale = 'pt-BR') {
 
         return date.toLocaleTimeString(locale, {
             hour: '2-digit',
-            minute:'2-digit'
+            minute: '2-digit'
         });
 
     }
 
-    static timeStampToTime(timeStamp){
+    static timeStampToTime(timeStamp) {
 
         return (timeStamp && typeof timeStamp.toDate === 'function') ? Format.dateToTime(timeStamp.toDate()) : '';
 

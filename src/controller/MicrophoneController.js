@@ -1,10 +1,9 @@
 import { ClassEvent } from "../util/ClassEvent";
 
-export class MicrophoneController  extends ClassEvent {
+export class MicrophoneController extends ClassEvent {
 
-    constructor(){
-
-        super(); //chama o pai base 
+    constructor() {
+        super();
 
         this._mimeType = 'audio/webm';
 
@@ -12,119 +11,117 @@ export class MicrophoneController  extends ClassEvent {
 
         navigator.mediaDevices.getUserMedia({
             audio: true
-        }).then(stream=>{
-
+        }).then(stream => {
             this._available = true;
+            this._stream = stream;
+            this.trigger('ready', this._stream);
 
-            this._stream = stream;    
+        }).catch(err => {
 
-            this.trigger('ready',  this._stream);
-
-        }).catch(err=>{
             console.error(err);
+
         });
 
     }
 
-    isAvailable(){
+    isAvailable() {
 
-        return  this._available;
-
-    }
-
-
-    stop(){
-
-        this._stream.getTracks().forEach(track =>{
-            track.stop();
-        });
+        return this._available
 
     }
 
-    startRecorder(){
+    stop() {
 
-        if (this.isAvailable()){
+        if (this._available) {
 
-           this._mediaRecorder = new MediaRecorder(this._stream, {
-            mimeTyme: this._mimeType
+            this._stream.getTracks().forEach(track => {
+
+                track.stop();
+
+            });
+            this.trigger('stop');
+
+        }
+    }
+    startRecorder() {
+
+        if (this.isAvailable()) {
+
+            this._mediaRecorder = new MediaRecorder(this._stream, {
+                mimeType: this._mimeType
             });
 
-           this._recordedChunks = [];
+            this._recordedChunks = [];
 
-           this._mediaRecorder.addEventListener('dataavailable', e=>{
+            this._mediaRecorder.addEventListener('dataavailable', e => {
 
-            if (e.data.size > 0) this._recordedChunks.push(e.data);
+                if (e.data.size > 0) this._recordedChunks.push(e.data);
 
-           });
+            });
 
-           this._mediaRecorder.addEventListener('stop', e=>{
+            this._mediaRecorder.addEventListener('stop', e => {
 
-            let blob = new Blob(this._recordedChunks, {
-                type: this._mimeType
-            }); //blob ele manipula os binarios, compacta os arquivos...
-
-            let filename = `rec${Date.now()}.webm`;
-
-            let audioContext = new AudioContext();
-
-            let reader = new FileReader();
-
-            reader.onload = e =>{
-
-                audioContext.decodeAudioData(reader.result).then(decode=>{
-
-                    let file = new File([blob], filename, {
-                        type: this._mimeType,
-                        lastModified: Date.now()
-                    });
-
-                    this.trigger('recorded', file, decode);
-
+                let blob = new Blob(this._recordedChunks, {
+                    type: this._mimeType
                 });
 
-            }
+                let filename = `rec${Date.now()}.webm`;
 
-            reader.readAsArrayBuffer(blob);
+                let audioContext = new AudioContext();
 
-            
-           });
+                let reader = new FileReader();
 
-           this._mediaRecorder.start();
-           this.startTimer();
+                reader.onload = e => {
 
+                    audioContext.decodeAudioData(reader.result).then(decode => {
+
+                        let file = new File([blob], filename, {
+                            type: this._mimeType,
+                            lastModified: Date.now()
+                        });
+
+                        this.trigger('recorded', file, decode);
+
+                    });
+                }
+
+                reader.readAsArrayBuffer(blob);
+
+            });
+
+            this._mediaRecorder.start();
+            this.startTimer();
         }
 
     }
 
     stopRecorder() {
+
         if (this.isAvailable()) {
 
             this._mediaRecorder.stop();
             this.stop();
             this.stopTimer();
-            
         }
 
     }
 
-    startTimer(){
+    startTimer() {
+
         let start = Date.now();
 
-        this._recordMicrophoneInterval = setInterval(()=>{
+        this._recordMicrophoneInterval = setInterval(() => {
 
-         this.trigger('recordtimer', Date.now() - start)
+            this.trigger('recordtimer', (Date.now() - start))
 
-        },100);
+        }, 100);
 
     }
 
-    stopTimer(){
+    stopTimer() {
 
         clearInterval(this._recordMicrophoneInterval);
 
     }
 
-
 }
-
-
